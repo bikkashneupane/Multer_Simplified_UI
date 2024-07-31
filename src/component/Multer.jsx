@@ -3,6 +3,7 @@ import { useState } from "react";
 const Multer = () => {
   const [form, setForm] = useState({});
   const [selectedImgs, setSelectedImgs] = useState([]);
+  const [res, setRes] = useState([]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -48,11 +49,26 @@ const Multer = () => {
       });
       const data = await response.json();
       const { imgeUrls } = data;
+      setRes(imgeUrls);
 
       // imgeUrls is an array of urls for multiple images
       // extract required url and display in jsx using following link
       // use http://localhost:8000/<imageUrl>
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
+  const deleteFromServer = async () => {
+    console.log(res);
+    try {
+      const url = "http://localhost:8000/api/v1/delete-images";
+      const result = await fetch(url, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ imagePath: res }),
+      });
+      const data = result.json();
       console.log(data);
     } catch (error) {
       console.log(error);
@@ -60,7 +76,7 @@ const Multer = () => {
   };
 
   return (
-    <div className="d-flex justify-content-center">
+    <div className="d-flex gap-4 justify-content-center">
       <form
         className="d-flex flex-column gap-4"
         encType="multipart/form-data"
@@ -113,6 +129,12 @@ const Multer = () => {
 
         <button type="submit">Submit</button>
       </form>
+
+      {res.length > 0 && (
+        <button style={{ height: "40px" }} onClick={deleteFromServer}>
+          Remove Images from server
+        </button>
+      )}
     </div>
   );
 };
